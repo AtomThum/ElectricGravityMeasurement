@@ -1,0 +1,47 @@
+\chapter{Results and discussion}
+
+The data observed from five trials over eight initial height from $\qty{0}{\centi\meter}$ to $\qty{14}{\centi\meter}$ is listed in \cref{tab:raw-data} and plotted in \cref{fig:raw-data-with-mean}.
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{| C | C | C | C | C | C | C |}
+		\hline
+		\textrm{Initial height} & \multicolumn{5}{|c|}{\textrm{Pk-Pk voltage difference} (\unit{\volt})} & \textrm{Mean} \\
+		\hline
+		\qty{0}{\centi\meter} & 0.106 & 0.133 & 0.159 & 0.133 & 0.142 & 0.112 \\
+		\qty{2}{\centi\meter} & 0.240 & 0.213 & 0.293 & 0.293 & 0.275 & 0.240 \\
+		\qty{4}{\centi\meter} & 0.355 & 0.382 & 0.364 & 0.400 & 0.355 & 0.349 \\
+		\qty{6}{\centi\meter} & 0.480 & 0.578 & 0.444 & 0.471 & 0.498 & 0.471 \\
+		\qty{8}{\centi\meter} & 0.622 & 0.631 & 0.604 & 0.693 & 0.676 & 0.623 \\
+		\qty{10}{\centi\meter} & 0.684 & 0.667 & 0.684 & 0.676 & 0.711 & 0.662 \\
+		\qty{12}{\centi\meter} & 0.738 & 0.747 & 0.863 & 0.720 & 0.774 & 0.746 \\
+		\qty{14}{\centi\meter} & 0.916 & 0.871 & 0.800 & 0.925 & 0.925 & 0.865 \\
+		\hline
+	\end{tabular}
+	\caption{Observed Pk-Pk voltage difference}
+	\label{tab:raw-data}
+\end{table}
+
+\begin{figure}[ht]
+	\centering
+	\includesvg[inkscapelatex = false, scale = 0.8]{raw-data.svg}
+	\caption{Pk-Pk voltage difference plot from different trials with the mean value shown in black.}
+	\label{fig:raw-data-with-mean}
+\end{figure}
+
+\Cref{fig:raw-data-with-mean} shows the observed data with the mean values from the five trials plotted in black. As seen, the mean values increases almost linearly with the initial height of the magnet. When the observation is plotted against the theoretical Pk-Pk voltage difference got from the simulation, the observation nearly lines up with the line $g = \qty{9.78}{\meter\per\second^2}$ shown in blue, which is Thailand's actual gravitational acceleration.
+
+\begin{figure}[ht]
+	\centering
+	\includesvg[inkscapelatex = false, scale = 0.8]{theoretical-pk-pk.svg}
+	\caption{Theoretical Pk-Pk voltage difference from $g = \qty{6}{\meter\per\second^2}$ to $\qty{12}{\meter\per\second^2}$ shown in colored lines. The blue line shows the theoretical Pk-Pk voltage difference of Thailand's actual gravity ($g = \qty{9.78}{\meter\per\second^2}$), and the black line shows the observed data.}
+	\label{fig:theoretical-pk-pk}
+\end{figure}
+\begin{figure}[ht]
+	\centering
+	\includesvg[inkscapelatex = false, scale = 0.8]{mse-gravity.svg}
+	\caption{The mean squared error between the theoretical Pk-Pk voltage difference and the observed voltage difference at different gravitaional acceleration values from $g = \qty{6}{\meter\per\second}$ to $g = \qty{12}{\meter\per\second}$. The blue dot shows the point where the mean squared error is lowest.}
+	\label{fig:mse-gravity}
+\end{figure}
+
+The mean squared error between all the predicted Pk-Pk voltage difference and the observed voltage difference are then calculated and plotted in \cref{fig:mse-gravity}. The point where the error is the lowest is at $g = \qty{9.529}{\meter\per\second^2}$ with coefficient of determination, $R^2$ equals to $0.942$, showing that the observed data do correlates with the predicted Pk-Pk voltage difference.
+

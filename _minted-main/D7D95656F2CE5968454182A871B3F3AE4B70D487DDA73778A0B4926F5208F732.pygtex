@@ -1,0 +1,84 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{using}\PYG{+w}{ }\PYG{n}{Plots}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{plotlyjs}\PYG{p}{()}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n}{CUDA}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n}{Statistics}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n}{StatsBase}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n}{Flux}
+\PYG{c}{\PYGZsh{} Variables declaration}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{magneticPermeability}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{1.256}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{l+m+mf}{10e\PYGZhy{}6}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{solenoidLoopCount}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{74}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{solenoidRadius}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.0058}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{copperRadius}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.00065}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{solenoidLength}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n+nb}{π}\PYG{o}{*}\PYG{n}{solenoidRadius}\PYG{o}{*}\PYG{n}{solenoidLoopCount}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{solenoidResistance}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{1.68}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{l+m+mf}{10e\PYGZhy{}8}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{solenoidLength}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{copperDensity}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{8850}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{solenoidMass}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{solenoidLength}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n+nb}{π}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{copperRadius}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{copperDensity}\PYG{+w}{ }\PYG{c}{\PYGZsh{} 0.018}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{magneticMoment}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.4}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{functionConst}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{magneticMoment}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{magneticPermeability}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{12}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{solenoidLoopCount}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{solenoidRadius}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{solenoidResistance}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{solenoidMass}\PYG{p}{)}
+\PYG{n}{F}\PYG{p}{(}\PYG{n}{z}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{functionConst}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{3}\PYG{o}{/}\PYG{p}{(}\PYG{n}{solenoidRadius}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{5}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z}\PYG{o}{/}\PYG{p}{(}\PYG{n}{solenoidRadius}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{c}{\PYGZsh{} Voltage as a function of position of magnet and velocity}
+\PYG{n}{voltage}\PYG{p}{(}\PYG{n}{z}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nd}{@.}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{solenoidLoopCount}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{magneticPermeability}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{solenoidMass}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{z}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{v}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{p}{(}\PYG{n}{solenoidRadius}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{\PYGZca{}}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m+mi}{3}\PYG{o}{*}\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{o}{/}\PYG{p}{(}\PYG{n}{solenoidRadius}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z}\PYG{o}{\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{\PYGZca{}}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{o}{/}\PYG{l+m+mi}{2}\PYG{p}{))}
+
+\PYG{c}{\PYGZsh{} Simulation configuration}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{simTime}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.4}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{timeStep}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.001}
+\PYG{k}{global}\PYG{+w}{ }\PYG{n}{timeInterval}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{CuArray}\PYG{p}{(}\PYG{n}{collect}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{o}{:}\PYG{n}{timeStep}\PYG{o}{:}\PYG{n}{simTime}\PYG{p}{))}
+
+\PYG{c}{\PYGZsh{} Simulating the voltage over time using Euler\PYGZsq{}s method}
+\PYG{k}{function}\PYG{+w}{ }\PYG{n}{voltSim}\PYG{p}{(}\PYG{n}{initZ}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gravitationalConst}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{posHistory}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kt}{Float64}\PYG{o}{.}\PYG{p}{([}\PYG{n}{initZ}\PYG{p}{])}
+\PYG{+w}{    }\PYG{n}{veloHistory}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k+kt}{Float64}\PYG{o}{.}\PYG{p}{([}\PYG{l+m+mf}{0.0}\PYG{p}{])}
+\PYG{+w}{    }\PYG{n}{accel}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{gravitationalConst}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{n}{timeIndex}\PYG{+w}{ }\PYG{c}{\PYGZsh{}accel = \PYGZhy{} gravitationalConst + F(posHistory[i]) * veloHistory[i]}
+\PYG{+w}{        }\PYG{n}{nextVelo}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{veloHistory}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{accel}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{timeStep}
+\PYG{+w}{        }\PYG{n}{push!}\PYG{p}{(}\PYG{n}{veloHistory}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{nextVelo}\PYG{p}{)}
+\PYG{+w}{        }\PYG{n}{nextPos}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{posHistory}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{veloHistory}\PYG{p}{[}\PYG{n}{i}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{timeStep}
+\PYG{+w}{        }\PYG{n}{push!}\PYG{p}{(}\PYG{n}{posHistory}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{nextPos}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{end}
+\PYG{+w}{    }\PYG{n}{minVoltage}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{maxVoltage}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{extrema}\PYG{p}{(}\PYG{n}{voltage}\PYG{o}{.}\PYG{p}{(}\PYG{n}{posHistory}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{veloHistory}\PYG{p}{))}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{abs}\PYG{p}{(}\PYG{n}{maxVoltage}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{minVoltage}\PYG{p}{)}\PYG{+w}{ }\PYG{c}{\PYGZsh{} Return the predicted Pk\PYGZhy{}Pk output.}
+\PYG{k}{end}
+
+\PYG{n}{gVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{collect}\PYG{p}{(}\PYG{l+m+mf}{9.52}\PYG{o}{:}\PYG{l+m+mf}{0.00001}\PYG{o}{:}\PYG{l+m+mf}{9.54}\PYG{p}{)}
+\PYG{n}{zVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{collect}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{o}{:}\PYG{l+m+mf}{0.02}\PYG{o}{:}\PYG{l+m+mf}{0.14}\PYG{p}{)}
+\PYG{n}{gMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{gVect}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{ones}\PYG{p}{(}\PYG{n}{size}\PYG{p}{(}\PYG{n}{zVect}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{))}\PYG{o}{\PYGZsq{}}
+\PYG{n}{zMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{ones}\PYG{p}{(}\PYG{n}{size}\PYG{p}{(}\PYG{n}{gMat}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{))}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{zVect}\PYG{o}{\PYGZsq{}}
+
+\PYG{n}{voltMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{voltSim}\PYG{o}{.}\PYG{p}{(}\PYG{n}{zMat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gMat}\PYG{p}{)}
+\PYG{n}{voltMatNorm}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{voltMat}\PYG{+w}{ }\PYG{c}{\PYGZsh{}.\PYGZhy{} minimum(voltMat, dims = 2)}
+
+\PYG{n}{data}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{+w}{ }\PYG{c}{\PYGZsh{} Raw data}
+\PYG{+w}{    }\PYG{l+m+mf}{0.106}\PYG{+w}{  }\PYG{l+m+mf}{0.133}\PYG{+w}{  }\PYG{l+m+mf}{0.159}\PYG{+w}{  }\PYG{l+m+mf}{0.133}\PYG{+w}{  }\PYG{l+m+mf}{0.142}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.240}\PYG{+w}{  }\PYG{l+m+mf}{0.213}\PYG{+w}{  }\PYG{l+m+mf}{0.293}\PYG{+w}{  }\PYG{l+m+mf}{0.293}\PYG{+w}{  }\PYG{l+m+mf}{0.275}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.355}\PYG{+w}{  }\PYG{l+m+mf}{0.382}\PYG{+w}{  }\PYG{l+m+mf}{0.364}\PYG{+w}{  }\PYG{l+m+mf}{0.400}\PYG{+w}{  }\PYG{l+m+mf}{0.355}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.480}\PYG{+w}{  }\PYG{l+m+mf}{0.578}\PYG{+w}{  }\PYG{l+m+mf}{0.444}\PYG{+w}{  }\PYG{l+m+mf}{0.471}\PYG{+w}{  }\PYG{l+m+mf}{0.498}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.622}\PYG{+w}{  }\PYG{l+m+mf}{0.631}\PYG{+w}{  }\PYG{l+m+mf}{0.604}\PYG{+w}{  }\PYG{l+m+mf}{0.693}\PYG{+w}{  }\PYG{l+m+mf}{0.676}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.684}\PYG{+w}{  }\PYG{l+m+mf}{0.667}\PYG{+w}{  }\PYG{l+m+mf}{0.684}\PYG{+w}{  }\PYG{l+m+mf}{0.676}\PYG{+w}{  }\PYG{l+m+mf}{0.711}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.738}\PYG{+w}{  }\PYG{l+m+mf}{0.747}\PYG{+w}{  }\PYG{l+m+mf}{0.863}\PYG{+w}{  }\PYG{l+m+mf}{0.720}\PYG{+w}{  }\PYG{l+m+mf}{0.774}\PYG{p}{;}
+\PYG{+w}{    }\PYG{l+m+mf}{0.916}\PYG{+w}{  }\PYG{l+m+mf}{0.871}\PYG{+w}{  }\PYG{l+m+mf}{0.800}\PYG{+w}{  }\PYG{l+m+mf}{0.925}\PYG{+w}{  }\PYG{l+m+mf}{0.925}\PYG{p}{;}
+\PYG{p}{]}\PYG{+w}{ }\PYG{c}{\PYGZsh{} Raw data, in millivolts}
+\PYG{n}{meanData}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{mean}\PYG{p}{(}\PYG{n}{data}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{dims}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{} Setup comparison}
+\PYG{n}{gVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{collect}\PYG{p}{(}\PYG{l+m+mi}{6}\PYG{o}{:}\PYG{l+m+mf}{0.00001}\PYG{o}{:}\PYG{l+m+mi}{12}\PYG{p}{)}
+\PYG{n}{zVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{collect}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{o}{:}\PYG{l+m+mf}{0.02}\PYG{o}{:}\PYG{l+m+mf}{0.14}\PYG{p}{)}
+\PYG{n}{gMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{gVect}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{ones}\PYG{p}{(}\PYG{n}{size}\PYG{p}{(}\PYG{n}{zVect}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{))}\PYG{o}{\PYGZsq{}}
+\PYG{n}{zMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{ones}\PYG{p}{(}\PYG{n}{size}\PYG{p}{(}\PYG{n}{gMat}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{))}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{zVect}\PYG{o}{\PYGZsq{}}
+\PYG{n}{voltMat}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{voltSim}\PYG{o}{.}\PYG{p}{(}\PYG{n}{zMat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{gMat}\PYG{p}{)}
+
+\PYG{c}{\PYGZsh{} Calculating errors}
+\PYG{n}{errorVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[]}
+\PYG{n}{rSqVect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[]}
+\PYG{c}{\PYGZsh{} Error calculation}
+\PYG{k}{function}\PYG{+w}{ }\PYG{n}{rSquared}\PYG{p}{(}\PYG{n}{y}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ypred}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{ss\PYGZus{}res}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sum}\PYG{p}{((}\PYG{n}{y}\PYG{+w}{ }\PYG{o}{.\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ypred}\PYG{p}{)}\PYG{o}{.\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{ss\PYGZus{}tot}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sum}\PYG{p}{((}\PYG{n}{y}\PYG{+w}{ }\PYG{o}{.\PYGZhy{}}\PYG{+w}{ }\PYG{n}{mean}\PYG{p}{(}\PYG{n}{y}\PYG{p}{))}\PYG{o}{.\PYGZca{}}\PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ss\PYGZus{}res}\PYG{o}{/}\PYG{n}{ss\PYGZus{}tot}
+\PYG{k}{end}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{o}{:}\PYG{n}{size}\PYG{p}{(}\PYG{n}{gVect}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{+w}{    }\PYG{n}{push!}\PYG{p}{(}\PYG{n}{errorVect}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Flux}\PYG{o}{.}\PYG{n}{Losses}\PYG{o}{.}\PYG{n}{mse}\PYG{p}{(}\PYG{n}{normDat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{voltMat}\PYG{o}{\PYGZsq{}}\PYG{p}{[}\PYG{o}{:}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{]))}
+\PYG{+w}{    }\PYG{n}{push!}\PYG{p}{(}\PYG{n}{rSqVect}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{rSquared}\PYG{p}{(}\PYG{n}{normDat}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{voltMat}\PYG{o}{\PYGZsq{}}\PYG{p}{[}\PYG{o}{:}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{]))}
+\PYG{k}{end}
+\PYG{c}{\PYGZsh{} Displaying the gravity}
+\PYG{n}{display}\PYG{p}{(}\PYG{n}{gVect}\PYG{p}{[}\PYG{n}{findall}\PYG{p}{(}\PYG{n}{x}\PYG{+w}{ }\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{n}{x}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{n}{minimum}\PYG{p}{(}\PYG{n}{errorVect}\PYG{p}{),}\PYG{+w}{ }\PYG{n}{errorVect}\PYG{p}{)])}
+\end{Verbatim}

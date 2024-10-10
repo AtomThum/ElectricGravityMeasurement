@@ -1,0 +1,38 @@
+\documentclass[tikz, crop, border = {2pt 2pt 2pt 2pt}]{standalone}
+
+\usepackage{concmath-otf}
+\usetikzlibrary{calc, angles, quotes, patterns}
+\usetikzlibrary{decorations.pathreplacing, decorations.pathmorphing, calligraphy}
+\usetikzlibrary{3d, perspective}
+
+\newcommand{\rc}{{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{scriptr.pdf}}$}}}}
+\newcommand{\brc}{{{\mbox{$\resizebox{.09in}{.08in}{\includegraphics[trim= 1em 0 14em 0,clip]{boldcursiver.pdf}}$}}}}
+\newcommand{\rchat}{{{\mbox{$\hat\rcurs$}}}}
+
+\begin{document}
+\begin{tikzpicture}[3d view = {30}{30}]
+	\begin{scope}[canvas is xy plane at z = 0]
+		\fill[lightgray!20] (-3.5, -3.5) rectangle (3.5, 3.5);
+		\draw[lightgray] (-3.5, -3.5) grid (3.5, 3.5);
+		\draw[very thick] (0, 0) circle (3cm);
+		\draw[decorate, decoration = {brace}] (-3.5, 0) -- node[auto]{$R$} ++ (0, 3);
+		\draw[dashed] (0, 0) -- (-3.5, 0);
+		\draw[dashed] (0, 3) -- ++ (-3.5, 0);
+	\end{scope}
+	\begin{scope}[canvas is xz plane at y = 0]
+		\draw[thick, -stealth] (0, 0) -- node[left]{$\hat{\pmb{\symrm{z}}}$} (0, 1);
+		\filldraw (0, 0) circle (1pt);
+	\end{scope}
+	\def\angl{-15}
+	\begin{scope}[
+		plane x = {({cos(\angl)}, {sin(\angl)}, 0)},
+		plane y = {(0, 0, 1)},
+		canvas is plane,
+		]
+		\draw[-stealth, thick] (0, 5) -- node[above right]{$\brc$} (3, 0);
+		\draw[-stealth, thick] (0, 0) -- node[below left = 0pt]{$\rho\hat{\pmb{\symrm{\rho}}} + \theta\hat{\pmb{\symrm{\theta}}}$} (3, 0);
+		\draw[-stealth, thick] (0, 0) -- node[left]{$h\hat{\pmb{\symrm{z}}}$} (0, 5);
+	\end{scope}
+	\filldraw (0, 0, 5) circle (2pt);
+\end{tikzpicture}
+\end{document}
