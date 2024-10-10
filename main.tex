@@ -1,14 +1,12 @@
 % !TEX program = xelatex
 
-%%%% This is not my usual style. Will be updated later when the school report is done.
-\documentclass[a4paper, 12pt, article, openany]{memoir}
+\documentclass[b5paper, 11pt, openleft]{memoir}
 
 \usepackage{indentfirst}
 
 %%% Font setup
 \usepackage[no-math]{fontspec}
-% \setmainfont{Sarabun}
-\setmainfont{TeX Gyre Heros}
+\setmainfont{Zilla Slab}
 \setmonofont[Scale = MatchLowercase]{Iosevka Custom}
 \XeTeXlinebreaklocale="en_EN"
 \XeTeXlinebreakskip=0pt plus 3pt
@@ -25,11 +23,11 @@
 % Page Layout and Margins
 \setsecnumdepth{subsection}
 \settocdepth{subsection}
-\setlrmarginsandblock{1in}{1in}{*}
-\setulmarginsandblock{1in}{1in}{*}
+\setlrmarginsandblock{4cm}{1.5cm}{*}
+\setulmarginsandblock{3cm}{2.5cm}{*}
 \setlength{\headheight}{30pt}
-\setlength{\parindent}{0cm} % Normal: 1.5cm
-\setlength{\parskip}{\baselineskip} % Normal: 0.3em
+\setlength{\parindent}{1.5cm}
+\setlength{\parskip}{0.3em}
 \setlength{\beforechapskip}{20pt}
 \renewcommand{\arraystretch}{1}
 \allowdisplaybreaks
@@ -37,52 +35,42 @@
 \checkandfixthelayout
 
 % Footnotes
-% \usepackage{fancyhdr}
-% \fancyhead[L]{\textbf{\thepage ~ $\big\vert$ \leftmark}}
-% \fancyhead[R]{\textbf{\rightmark ~ $\big\vert$ \thepage}}
-% \fancyhead[RE, LO, C]{}
-% \fancyfoot[C]{\thepage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[LE]{\textbf{\thepage ~ $\big\vert$ \leftmark}}
+\fancyhead[RO]{\textbf{\rightmark ~ $\big\vert$ \thepage}}
+\fancyhead[RE, LO, C]{}
 
 % Styling Figures
 \usepackage{multicol, caption}
 \setlength{\columnseprule}{1pt}
-% \def\columnseprulecolor{\color{lightgray}}
-% \DeclareCaptionLabelSeparator{pipe}{ $\vert$ }
-% \captionsetup{
-%     labelfont = {bf},
-%     font = {small, sc},
-%     width = 0.6\textwidth,
-%     labelsep = pipe,
-%     figurename = \textbf{Fig. }
-% }
+\def\columnseprulecolor{\color{lightgray}}
+\DeclareCaptionLabelSeparator{pipe}{ $\vert$ }
 \captionsetup{
-	labelfont = {bf},
-	width = 0.8\textwidth,
-	figurename = \textbf{Fig.},
-	labelsep = quad
+    labelfont = {bf},
+    font = {small, sc},
+    width = 0.6\textwidth,
+    labelsep = pipe,
+    figurename = \textbf{Fig. }
 }
 
-% % Styling Titles
-% \renewcommand{\partnamefont}{\LARGE\bfseries\scshape\centering}
-% \renewcommand{\partnumfont}{\LARGE\bfseries\scshape\centering\MakeUppercase}
-% \renewcommand{\midpartskip}{\par\rule{1in}{0.5pt}\vspace{1em}\par}
-% \renewcommand{\printparttitle}{\HUGE\bfseries\scshape\centering}
-% \renewcommand{\afterpartskip}{\relax}
-% \chapterstyle{veelo}
-%     \renewcommand*{\printchapternum}{%
-%     \makebox[0pt][l]{%
-%     \hspace{.8em}%
-%     \resizebox{!}{\beforechapskip}%
-%     {\chapnumfont \thechapter}%
-%     \hspace{.8em}%
-%     \rule{2\midchapskip}{\beforechapskip}%
-%     }%
-% }
+% Styling Titles
+\renewcommand{\partnamefont}{\LARGE\bfseries\scshape\centering}
+\renewcommand{\partnumfont}{\LARGE\bfseries\scshape\centering\MakeUppercase}
+\renewcommand{\midpartskip}{\par\rule{1in}{0.5pt}\vspace{1em}\par}
+\renewcommand{\printparttitle}{\HUGE\bfseries\scshape\centering}
+\renewcommand{\afterpartskip}{\relax}
+\chapterstyle{veelo}
+    \renewcommand*{\printchapternum}{%
+    \makebox[0pt][l]{%
+    \hspace{.8em}%
+    \resizebox{!}{\beforechapskip}%
+    {\chapnumfont \thechapter}%
+    \hspace{.8em}%
+    \rule{2\midchapskip}{\beforechapskip}%
+    }%
+}
 
-% KMUTT Titles Styling
-\renewcommand{\chaptitlefont}{\LARGE\bfseries}
-\renewcommand{\thechapter}{\arabic{chapter}.}
-\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}.}
 % Packages
 \usepackage[dvipsnames]{xcolor}
 \usepackage{subcaption, graphicx, pdfpages, float, wrapfig}
@@ -215,9 +203,12 @@
 \newcommand{\prerequisites}[1]{\textbf{Prerequisites:}~\emph{#1}}
 
 % Bibliographies
-% Fuck you KMUTT. I hate your biblographies. End note is so good isn't it???
-\newcommand{\llabel}[1]{\label{ite:#1}}
-\newcommand{\lcite}[1]{\ref{ite:#1}}
+\usepackage[
+    backend = biber,
+    style = phys,
+    sorting = anyvt
+]{biblatex}
+\addbibresource{bibfile.bib}
 
 \usepackage[inkscapeversion = 1, inkscapelatex = true]{svg}
 \svgpath{{code/}}
@@ -235,35 +226,22 @@
 		\enquote{Measurement of gravity by the voltage difference induced on a solenoid by a free falling magnet}
 	}
 }
-\author{
-	Puripat Thumbanthu
-}
-\date{\vspace{-2.5em}}
+\author{Puripat Thumbanthu}
+\date{Started: 17/09/2024, Revision: \today}
 \maketitle
 
-\hrule
-
+\vspace{-7em}
 \tableofcontents*
 
 \mainmatter
 
-\input{chapters/introduction}
-\input{chapters/theory}
-\input{chapters/methodology}
-\input{chapters/results}
-\input{chapters/conclusion}
+\include{chapters/introduction}
+\include{chapters/theory}
+\include{chapters/methodology}
+\include{chapters/results}
+\include{chapters/conclusion}
 
 % Bibliography
-% Fuck you KMUTT
-
-\chapter{Bibliography}
-\begin{enumerate}[label = {[\arabic*]}]
-	\item Ahmad Khan, Ammar, n.d., \textbf{Physlab} [Online], Available: \url{https://physlab.org/wp-content/uploads/2016/04/Measuring_gravity.pdf} [2024, September 27] \llabel{khan-no-date}
-	\item Boyer, Timothy H., 1988, "The force on a magnetic dipole", \textbf{American Journal of Physics}, Vol. 56, No. 8, pp. 688-692 \llabel{boyer-1988}
-	\item David, Griffiths J., 2023, \textbf{Introduction to Electrodynamics}, 4\textsuperscript{th} ed., Cambridge University Press, United State, p. 225. \llabel{griffiths-2023}
-	\item Jing, Liu, 2019, "Simplified measurement of gravity acceleration based on electromagnetic induction principle", \textbf{International Journal of Advanced Research}, Vol. 7, No. 8, pp. 1129-1133 \llabel{jing-2019}
-	\item Riad, Ihab F, 2023, "Measuring g using magnetic induction", \textbf{Physics Education}, Vol. 58, No. 3, pp. 035008 \llabel{riad-2023}
-	\item Zangwill, A., 2013, \textbf{Modern Electrodynamics}, Cambridge University Press, United State, p. 338. \llabel{zangwill-2013}
-\end{enumerate}
+\printbibliography
 
 \end{document}
